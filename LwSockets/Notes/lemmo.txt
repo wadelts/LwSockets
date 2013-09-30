@@ -1,0 +1,14 @@
+To list open ports... (Note: may need to run this as admin, so Win-X, Command Prompt (Admin)
+
+netstat -nbo
+
+
+To kill a process from command prompt...
+
+Taskkill /PID 2436
+or
+Taskkill /PID 9999 /F
+...to forcefully kill it
+
+// Add this to JVM command line to have logger print lines on single line (gods bless Stackoverflow!)...
+-Djava.util.logging.SimpleFormatter.format="%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$s %2$s %5$s%6$s%n"
