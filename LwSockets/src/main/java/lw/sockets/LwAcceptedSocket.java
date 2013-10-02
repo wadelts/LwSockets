@@ -150,7 +150,7 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 	}
 
 	/**
-	 * Process the incoming mesage
+	 * Process the incoming message
 	 */
 	private void consumeXMLMsg() throws LwSocketException {
 		String TID = getTID();
@@ -159,6 +159,10 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 		logger.fine("Request to " + service.toString() + " OBJ_XML received.");
 
 		StringBuilder payLoad = getMessageForTID(TID);
+		if (payLoad == null) {
+			throw new LwSocketException("Could not get payLoad for TID " + TID + ", so cannot consumeXMLMsg.");
+		}
+		
 		boolean consumeMessage = false;
 		if (service == LwSocketComms.SocketService.CONSUME) { // deliver it to the implementing application
 			// Give the implementor of this interface the opportunity to process the message...
