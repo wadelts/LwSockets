@@ -1,0 +1,17 @@
+This project defines classes for sending simple messages over sockets.
+
+The entry points for using this project are the following classes:
+
+	SocketComms					handles all communications with a socket, either client or server.
+	XMLSocketServer				encapsulates a socket server for accepting XML messages.
+								Contains a SocketComms object.
+	LwIXMLSocketServerListener	interface to implement to receive call-backs from an XMLSocketServer instance.
+	
+The SocketComms class works standalone as the client side.
+The XMLSocketServer acts as the complimenting server side.
+
+See the TestSimpleSocketServer.java JUnit test case for an example of creating client and server instances.
+See ExampleSocketServer for an example of using LwIXMLSocketServerListener interface.
+
+See the GeMHa project for example use of these classes, especially AcceptMessagesFromSocket.java and
+ProcessMessageForSocket.java.
