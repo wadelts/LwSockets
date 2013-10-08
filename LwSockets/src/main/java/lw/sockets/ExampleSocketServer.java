@@ -19,7 +19,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
     private FileHandler fh = null;
     private final String logFileName = "logs/ExampleSocketServer.log";
     private final String shutDownLogFileName = "logs/ExampleSocketServer_shutdown.log";
-    private LwXMLSocketServer sockServer = null;
+    private XMLSocketServer sockServer = null;
 	private ExecutorService execPool;				// the pool of threads for this application
 	
 	volatile private boolean stayAlive = true;
@@ -71,11 +71,11 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 		try {
 			// Setting server up with only 1 connection thread allowed run at a time (albeit in its own thread, separate from the socket server itself)
 			execPool = Executors.newFixedThreadPool(1);
-			sockServer = new LwXMLSocketServer(execPool, this, 11819);
+			sockServer = new XMLSocketServer(execPool, this, 11819);
 			new Thread(sockServer).start(); // LwXMLSocketServer implements Thread, so can have any number of servers!
 			logger.info("sockServer started.");
 		}
-		catch(LwSocketException e) {
+		catch(SocketException e) {
 			logger.severe("Couldn't create new sockServer: " + e.getMessage());
 			System.exit(-1);
 		}
@@ -109,7 +109,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 	  * @return true if the response is to be consumed, otherwise false
 	  */
 	@Override
-	public boolean messageReceived(LwSocketEvent event) {
+	public boolean messageReceived(SocketEvent event) {
 		logger.info("Got message from port " + event.getPortNumber() + " for TID " + event.getTID() + ": " + event.getReceivedMessage());
 		return true;
 	}
@@ -123,7 +123,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 	  * @return the response to be sent back over the socket
 	  */
 	@Override
-	public String messageReceivedAndWantResponse(LwSocketEvent event) {
+	public String messageReceivedAndWantResponse(SocketEvent event) {
 		logger.info("Got message from port " + event.getPortNumber() + " for TID " + event.getTID() + ": " + event.getReceivedMessage());
 		return "<APP_DEFINED_RESPONSE><KEY>" + event.getTID() + "</KEY><STATUS>SUCCESS</STATUS></APP_DEFINED_RESPONSE>";
 	}
@@ -136,7 +136,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 	  *
 	  */
 	@Override
-	public void handleError(LwSocketEvent event, LwSocketException exception) {
+	public void handleError(SocketEvent event, SocketException exception) {
 		logger.info("Handled error from Socket Server on port " + event.getPortNumber() + " for TID " + event.getTID() + " LwSocketException: " + exception.getMessage());
 	}
 
@@ -150,7 +150,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 	  * @return true if the Socket Server shold close down, false if it should remain open
 	  */
 	@Override
-	public boolean canCloseServerSocket(LwSocketEvent event) {
+	public boolean canCloseServerSocket(SocketEvent event) {
 		logger.info("Got request to close Server Socket on port " + event.getPortNumber() + " for TID " + event.getTID());
 		stayAlive = false;
 		return true;
@@ -194,7 +194,7 @@ public class ExampleSocketServer implements LwIXMLSocketServerListener
 		try {
 			sockServer.close(shutdownLogger);
 		}
-		catch(LwSocketException e) {
+		catch(SocketException e) {
 			System.out.println("ExampleSocketServer.shutDown(): caught LwSocketException trying to shut down.");
 		}
 

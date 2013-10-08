@@ -6,7 +6,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.io.*;
 import java.net.*;
 
-import lw.sockets.LwSocketComms.SocketType;
+import lw.sockets.SocketComms.SocketType;
 import lw.sockets.interfaces.LwIXMLSocketServerListener;
 import lw.utils.LwLogger;
 
@@ -19,7 +19,7 @@ import lw.utils.LwLogger;
   * @author Liam Wade
   * @version 1.0 11/12/2008
   */
-public class LwXMLSocketServer implements Runnable {
+public class XMLSocketServer implements Runnable {
 
 	private static final Logger logger = Logger.getLogger("gemha");
 
@@ -36,7 +36,7 @@ public class LwXMLSocketServer implements Runnable {
 
 
 
-	public LwXMLSocketServer(ExecutorService execPool, LwIXMLSocketServerListener app, int portNumber) throws LwSocketException {
+	public XMLSocketServer(ExecutorService execPool, LwIXMLSocketServerListener app, int portNumber) throws SocketException {
 		checkNullArgument(execPool);
 		checkNullArgument(app);
 		
@@ -50,11 +50,11 @@ public class LwXMLSocketServer implements Runnable {
 			logger.info("[SERVER-" + Thread.currentThread().getName() + "]: Socket Server created.");
 		}
 		catch(IOException e) {
-			throw new LwSocketException("LwXMLSocketServer.constructor: Error creating new Server Socket", e);
+			throw new SocketException("LwXMLSocketServer.constructor: Error creating new Server Socket", e);
 		}
 	}
 
-	public LwXMLSocketServer(ExecutorService execPool, LwIXMLSocketServerListener app, int portNumber, SynchronousQueue<String> synchQueue) throws LwSocketException {
+	public XMLSocketServer(ExecutorService execPool, LwIXMLSocketServerListener app, int portNumber, SynchronousQueue<String> synchQueue) throws SocketException {
 		checkNullArgument(execPool);
 		checkNullArgument(app);
 
@@ -68,7 +68,7 @@ public class LwXMLSocketServer implements Runnable {
 			logger.info("[SERVER-" + Thread.currentThread().getName() + "]: Socket Server created.");
 		}
 		catch(IOException e) {
-			throw new LwSocketException("LwXMLSocketServer.constructor: Error creating new Server Socket", e);
+			throw new SocketException("LwXMLSocketServer.constructor: Error creating new Server Socket", e);
 		}
 	}
 
@@ -80,8 +80,8 @@ public class LwXMLSocketServer implements Runnable {
 		try {
 			accept();
 		}
-		catch(LwSocketException e) {
-			app.handleError(new LwSocketEvent("TID Unavailable", portNumber), e);
+		catch(SocketException e) {
+			app.handleError(new SocketEvent("TID Unavailable", portNumber), e);
 		}
 
 	}
@@ -90,7 +90,7 @@ public class LwXMLSocketServer implements Runnable {
 	  * Block on the socket, waiting for a new connection.
 	  *
 	  */
-	public void accept() throws LwSocketException {
+	public void accept() throws SocketException {
 		// Note, only accepts one connection at a time...
 		while (!shutDownRequested) {
 			Socket incoming;
@@ -100,7 +100,7 @@ public class LwXMLSocketServer implements Runnable {
 				if (shutDownRequested) {
 					break; // ...out of while (!shutDownRequested)
 				} else {
-					throw new LwSocketException("LwXMLSocketServer.accept(): Caught IOException accepting new socket connection: ", e);
+					throw new SocketException("LwXMLSocketServer.accept(): Caught IOException accepting new socket connection: ", e);
 				}
 			}
 	
@@ -115,7 +115,7 @@ public class LwXMLSocketServer implements Runnable {
 			logger.info("[SERVER-" + Thread.currentThread().getName() + "]: New client connection accepted.");
 			
 			// May throw LwSocketException
-			LwAcceptedSocket acceptedSocketConnection = new LwAcceptedSocket(this, app, incoming, SocketType.SERVER, portNumber);
+			AcceptedSocket acceptedSocketConnection = new AcceptedSocket(this, app, incoming, SocketType.SERVER, portNumber);
 			execPool.execute(acceptedSocketConnection);
 			logger.info("[SERVER-" + Thread.currentThread().getName() + "]: New LwAcceptedSocket object created and executed.");
 		}
@@ -128,9 +128,9 @@ public class LwXMLSocketServer implements Runnable {
 	  *
      * @param out the Logger to use to report events etc
      *
-	  * @throws LwSocketException when any error is encountered
+	  * @throws SocketException when any error is encountered
 	  */
-	public void close(LwLogger out) throws LwSocketException {
+	public void close(LwLogger out) throws SocketException {
 		// LwLogger used when close() is called by
 		// a VM shutdown hook, in which case the logger may be dead (it's shutdown hook may be
 		// executed before ours), so a FileWriter object is used instead.
@@ -167,7 +167,7 @@ public class LwXMLSocketServer implements Runnable {
 		shutDownRequested = true;
 		try {
 			close(null); // Only way to interrupt accept(), as it doesn't check Thread.interrupted()
-		} catch (LwSocketException e) {
+		} catch (SocketException e) {
 			// Ignore any prob here
 			logger.info("[SERVER-" + Thread.currentThread().getName() + "]: Ignored LwSocketException closing server socket on port " + portNumber + ": " + e);
 		}

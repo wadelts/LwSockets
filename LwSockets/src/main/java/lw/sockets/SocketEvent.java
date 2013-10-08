@@ -5,7 +5,7 @@ package lw.sockets;
   * @author Liam Wade
   * @version 1.0 11/12/2008
   */
-public class LwSocketEvent
+public class SocketEvent
 {
   /**
     * Will create a new exception with the given reason.
@@ -13,7 +13,7 @@ public class LwSocketEvent
 	* @param TID the unique Transaction ID for the message involved in this event
 	* @param portNumber the port on which the socket server listens (aid to identifying actual problem)
     */
-	public LwSocketEvent(String TID, int portNumber) {
+	public SocketEvent(String TID, int portNumber) {
 		this.TID = TID;
 		this.portNumber = portNumber;
 	}
@@ -25,7 +25,7 @@ public class LwSocketEvent
 	* @param portNumber the port on which the socket server listens (aid to identifying actual problem)
 	* @param receivedMessage he message received over the socket
     */
-	public LwSocketEvent(String TID, int portNumber, String receivedMessage) {
+	public SocketEvent(String TID, int portNumber, String receivedMessage) {
 		this.TID = TID;
 		this.portNumber = portNumber;
 		this.receivedMessage = receivedMessage;

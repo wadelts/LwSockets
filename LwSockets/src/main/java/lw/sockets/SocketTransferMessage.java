@@ -1,7 +1,7 @@
 package lw.sockets;
 
-import lw.sockets.LwSocketComms.SocketFormat;
-import lw.sockets.LwSocketComms.SocketService;
+import lw.sockets.SocketComms.SocketFormat;
+import lw.sockets.SocketComms.SocketService;
 
 /**
   * Encapsulates information about an event arising from socket activity.
@@ -11,7 +11,7 @@ import lw.sockets.LwSocketComms.SocketService;
   * @author Liam Wade
   * @version 1.0 20/09/2013
   */
-public class LwSocketTransferMessage {
+public class SocketTransferMessage {
 	final private int errNo;			// data length for message
 	final private String TID;				// a unique transaction ID
 	final private SocketService service;	// Service requested in messqge
@@ -26,7 +26,7 @@ public class LwSocketTransferMessage {
 	* @param payload he message received over the socket
     */
 
-	public LwSocketTransferMessage(int errNo, String TID, SocketService service, SocketFormat format, String payload) {
+	public SocketTransferMessage(int errNo, String TID, SocketService service, SocketFormat format, String payload) {
 		super();
 		this.errNo = errNo;
 		this.TID = TID;

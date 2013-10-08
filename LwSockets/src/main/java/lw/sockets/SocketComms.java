@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Thread-safety: This class is NOT thread safe.
  *
  */
-public class LwSocketComms {
+public class SocketComms {
 	final private Socket incoming;
 	final private InputStream is;
 	final private OutputStream os;
@@ -29,7 +29,7 @@ public class LwSocketComms {
 	final private HashMap<String,StringBuilder> messageShelf = new HashMap<String,StringBuilder>();
 
 	// Only set by called method(s) (==> always same thread), not in Constructor, so no need to make volatile
-	private LwSocketTransferMessage lastMessageReceived;
+	private SocketTransferMessage lastMessageReceived;
 
 	// The type of socket comunications to set up
 	static public enum SocketType {
@@ -127,7 +127,7 @@ public class LwSocketComms {
 	  * @param socketType the side of the connection using this LwSocketComms object e.g. SERVER
 	  *
 	  */
-    public LwSocketComms(Socket incoming, SocketType socketType) throws LwSocketException {
+    public SocketComms(Socket incoming, SocketType socketType) throws SocketException {
 		checkNullArgument(incoming);
 
 		this.incoming = incoming;
@@ -135,14 +135,14 @@ public class LwSocketComms {
 		try {
 			is = incoming.getInputStream();
 		} catch (IOException e) {
-			throw new LwSocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Caught IOException creating new input stream: " + e, -1001);
+			throw new SocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Caught IOException creating new input stream: " + e, -1001);
 		}
 		try {
 			os = incoming.getOutputStream();
 		}
 		catch(IOException e) {
 			try { incoming.close(); } catch (IOException e1) { /* Ignore */}
-			throw new LwSocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Caught IOException creating new output stream: " + e, -1002);
+			throw new SocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Caught IOException creating new output stream: " + e, -1002);
 		}
 		
 		this.socketType = socketType;
@@ -155,7 +155,7 @@ public class LwSocketComms {
 	  *
 	  * @return true if irrecoverable technical problem encountered (e.g. client rudely closes without sending CLOSE instr)
 	  */
-	public boolean next() throws LwSocketException {
+	public boolean next() throws SocketException {
 		String str = readMsg();
 		logger.info("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Msg received is:" + str.trim());
 
@@ -172,7 +172,7 @@ public class LwSocketComms {
 			int lastDataLength = Integer.parseInt(str.substring(12, 17));
 			String lastTID = str.substring(18, 18 + 255).trim();
 			String lastPayload = str.substring(18 + 255).trim();
-			lastMessageReceived = new LwSocketTransferMessage(Integer.parseInt(lastErrNo), lastTID, lastService, lastFormat, lastPayload);
+			lastMessageReceived = new SocketTransferMessage(Integer.parseInt(lastErrNo), lastTID, lastService, lastFormat, lastPayload);
 			logger.fine("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Service =" + lastService + " Object  =" + lastFormat + " DataLen =" + lastDataLength);
 			
 			if (lastTID.length() > 0) {
@@ -191,7 +191,7 @@ public class LwSocketComms {
 	  * 
 	  *
 	  */
-	public void sendMessage(LwSocketTransferMessage socketTransferMessage) throws LwSocketException {
+	public void sendMessage(SocketTransferMessage socketTransferMessage) throws SocketException {
 		checkNullArgument(socketTransferMessage);
 		
 		// instrCode instruction for the consumer : 0: No more data for this Message; 1: more data to come for this Message; -1: discard all data for this Message
@@ -225,7 +225,7 @@ public class LwSocketComms {
 	  * 
 	  *
 	  */
-	private void sendPacket(Integer errNo, String TID, SocketService lastService, SocketFormat lastFormat, String dataPart) throws LwSocketException {
+	private void sendPacket(Integer errNo, String TID, SocketService lastService, SocketFormat lastFormat, String dataPart) throws SocketException {
 		checkNullArgument(TID);
 		checkNullArgument(lastService);
 		checkNullArgument(lastFormat);
@@ -257,7 +257,7 @@ public class LwSocketComms {
 			os.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new LwSocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: failed to write/flush socket! Exception:" + e);
+			throw new SocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: failed to write/flush socket! Exception:" + e);
 		}
 	}
 
@@ -375,7 +375,7 @@ public class LwSocketComms {
 	/**
 	  * Read a message from the input stream.
 	  */
-	private String readMsg() throws LwSocketException
+	private String readMsg() throws SocketException
 	// Get a response from the the connected socket.
 	{
 		byte[] response = new byte[MESSAGE_SIZE];
@@ -396,7 +396,7 @@ public class LwSocketComms {
 					return new String(response);
 			}
 			catch(IOException e) {
-				throw new LwSocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Error: " + e);
+				throw new SocketException("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Error: " + e);
 			}
 		}
 

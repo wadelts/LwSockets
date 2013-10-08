@@ -16,18 +16,18 @@ import lw.sockets.interfaces.LwIXMLSocketServerListener;
  * Thread-safety: This class is thread safe.
  * 
  */
-class LwAcceptedSocket extends LwSocketComms implements Runnable {
+class AcceptedSocket extends SocketComms implements Runnable {
 	private static final Logger logger = Logger.getLogger("gemha");
 
 	volatile private boolean shutDown = false;	// If set to true, will shut down server. Can be set through the socket SERV_SHUTDOWN command
 												// Needs to be volatile as object may be instantiated by one thread and run() in another
 
-	final private LwXMLSocketServer parent;			// the parent socket server - need this to tell him to shut down, if allowed
+	final private XMLSocketServer parent;			// the parent socket server - need this to tell him to shut down, if allowed
 	final private LwIXMLSocketServerListener app; // The object that will be implementing interface LwIXMLSocketServerListener
 	final private int portNumber;
 	final private SocketType socketType;
 
-	public LwAcceptedSocket(LwXMLSocketServer parent, LwIXMLSocketServerListener app, Socket incoming, SocketType socketType, int portNumber) throws LwSocketException {
+	public AcceptedSocket(XMLSocketServer parent, LwIXMLSocketServerListener app, Socket incoming, SocketType socketType, int portNumber) throws SocketException {
 		super(incoming, socketType);
 		
 		assert parent != null;
@@ -45,9 +45,9 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 		try {
 			acceptMessages();
 		}
-		catch(LwSocketException e) {
+		catch(SocketException e) {
 			String TID = (getTID() == null ? "Unknown TID" : getTID());
-			app.handleError(new LwSocketEvent(TID, portNumber), e);
+			app.handleError(new SocketEvent(TID, portNumber), e);
 		}
 	}
 
@@ -55,14 +55,14 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 	  * Commence accepting messages
 	  * Calls receiveMessage() when a message is ready.
 	  *
-	  * @throws LwSocketException when any error is encountered
+	  * @throws SocketException when any error is encountered
 	  */
-	private void acceptMessages() throws LwSocketException {
+	private void acceptMessages() throws SocketException {
 
 		// First send Server-ready message to client...
 		logger.info("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]:Connection accepted. Going to send SERV_READY instruction...");
 		Integer errNo = new Integer(0);
-		sendMessage(new LwSocketTransferMessage(errNo, "1", SocketService.READY, SocketFormat.XML, "Server Ready"));
+		sendMessage(new SocketTransferMessage(errNo, "1", SocketService.READY, SocketFormat.XML, "Server Ready"));
 
 		boolean closeConnection = false;
 		while (!closeConnection && !shutDown) {
@@ -76,7 +76,7 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 				case SHUTDOWN :
 					logger.info("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Request to SHUTDOWN received.");
 
-					if ( app.canCloseServerSocket(new LwSocketEvent(getTID(), portNumber)) ) {
+					if ( app.canCloseServerSocket(new SocketEvent(getTID(), portNumber)) ) {
 						logger.info("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Controling application granted request to close Socket Server. Setting shutDown to true.");
 						shutDown = true;
 					}
@@ -106,7 +106,7 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 							// Now Respond
 							errNo   = new Integer(0);
 							
-							sendMessage(new LwSocketTransferMessage(errNo, getTID(), LwSocketComms.SocketService.MORE, LwSocketComms.SocketFormat.XML, "Message part saved. Awaiting more"));
+							sendMessage(new SocketTransferMessage(errNo, getTID(), SocketComms.SocketService.MORE, SocketComms.SocketFormat.XML, "Message part saved. Awaiting more"));
 							logger.fine("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Response returned to socket client.");
 							break;
 						case UNRECOGNISED:
@@ -124,7 +124,7 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 
 							// Now Respond
 							errNo   = new Integer(0);
-							sendMessage(new LwSocketTransferMessage(errNo, getTID(), LwSocketComms.SocketService.DISCARD, LwSocketComms.SocketFormat.XML, "Message discarded"));
+							sendMessage(new SocketTransferMessage(errNo, getTID(), SocketComms.SocketService.DISCARD, SocketComms.SocketFormat.XML, "Message discarded"));
 							logger.fine("Response returned to socket client.");
 							break;
 						case UNRECOGNISED:
@@ -152,21 +152,21 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 	/**
 	 * Process the incoming message
 	 */
-	private void consumeXMLMsg() throws LwSocketException {
+	private void consumeXMLMsg() throws SocketException {
 		String TID = getTID();
 		Integer errNo;
-		LwSocketComms.SocketService service = getLastService();
+		SocketComms.SocketService service = getLastService();
 		logger.fine("Request to " + service.toString() + " OBJ_XML received.");
 
 		StringBuilder payLoad = getMessageForTID(TID);
 		if (payLoad == null) {
-			throw new LwSocketException("Could not get payLoad for TID " + TID + ", so cannot consumeXMLMsg.");
+			throw new SocketException("Could not get payLoad for TID " + TID + ", so cannot consumeXMLMsg.");
 		}
 		
 		boolean consumeMessage = false;
-		if (service == LwSocketComms.SocketService.CONSUME) { // deliver it to the implementing application
+		if (service == SocketComms.SocketService.CONSUME) { // deliver it to the implementing application
 			// Give the implementor of this interface the opportunity to process the message...
-			consumeMessage = app.messageReceived(new LwSocketEvent(TID, portNumber, payLoad.toString()));
+			consumeMessage = app.messageReceived(new SocketEvent(TID, portNumber, payLoad.toString()));
 			// TODO: ...
 /* NEED TO IMPLEMENT THIS FOR MULTIPLE THREADS !!!!!
 			// Is OK to use this synchQueue method, if take() is used on other side (it also blocks)
@@ -182,7 +182,7 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 */
 			// Now Respond
 			errNo   = new Integer(consumeMessage ? 0 : 1);
-			sendMessage(new LwSocketTransferMessage(errNo, TID, SocketService.CONSUME, LwSocketComms.SocketFormat.XML, "Message " + (consumeMessage ? "" : "not ") + "consumed"));
+			sendMessage(new SocketTransferMessage(errNo, TID, SocketService.CONSUME, SocketComms.SocketFormat.XML, "Message " + (consumeMessage ? "" : "not ") + "consumed"));
 			logger.fine("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Response returned to socket client.");
 		}
 		else { // is SERV_CONSUME_RESPOND
@@ -191,15 +191,15 @@ class LwAcceptedSocket extends LwSocketComms implements Runnable {
 			// Just send confirmation of receipt of msg
 			errNo   = new Integer(consumeMessage ? 0 : 1);
 			
-			sendMessage(new LwSocketTransferMessage(errNo, TID, SocketService.CONSUME, LwSocketComms.SocketFormat.XML, "Message " + (consumeMessage ? "" : "not ") + "consumed"));
+			sendMessage(new SocketTransferMessage(errNo, TID, SocketService.CONSUME, SocketComms.SocketFormat.XML, "Message " + (consumeMessage ? "" : "not ") + "consumed"));
 			logger.fine("[" + socketType.toString() + "-" + Thread.currentThread().getName() + "]: Receipt Response returned to socket client.");
 
 			// Give the implementor of this interface the opportunity to consume the message...
-			String responseMessage = app.messageReceivedAndWantResponse(new LwSocketEvent(TID, portNumber, payLoad.toString()));
+			String responseMessage = app.messageReceivedAndWantResponse(new SocketEvent(TID, portNumber, payLoad.toString()));
 			if (responseMessage != null) {
 				errNo   = new Integer(0);
 				// Now return the meat response...
-				sendMessage(new LwSocketTransferMessage(errNo, TID, SocketService.CONSUME, LwSocketComms.SocketFormat.XML, responseMessage));
+				sendMessage(new SocketTransferMessage(errNo, TID, SocketService.CONSUME, SocketComms.SocketFormat.XML, responseMessage));
 				
 				responseMessage = null;
 			}

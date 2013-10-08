@@ -5,7 +5,7 @@ package lw.sockets;
   * @author Liam Wade
   * @version 1.0 11/12/2008
   */
-public class LwSocketException extends Exception
+public class SocketException extends Exception
 {
   /**
 	 * 
@@ -15,14 +15,14 @@ public class LwSocketException extends Exception
 /**
     * Will create a new exception.
     */
-	public LwSocketException() {
+	public SocketException() {
 	}
 
   /**
     * Will create a new exception with the given message.
 	* @param message the text explaining the error
     */
-	public LwSocketException(String message) {
+	public SocketException(String message) {
 		super(message);
 		errorCode = 0;
 	}
@@ -32,7 +32,7 @@ public class LwSocketException extends Exception
 	* @param message, the detail message (which is saved for later retrieval by the Throwable.getMessage() method).
 	* @param cause - the cause (which is saved for later retrieval by the Throwable.getCause() method). (A null value is permitted, and indicates that the cause is nonexistent or unknown.)
     */
-	public LwSocketException(String message, Throwable cause) {
+	public SocketException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -41,7 +41,7 @@ public class LwSocketException extends Exception
 		* @param message the text explaining the error
 		* @param errorCode the error code associated with the exception
 	    */
-		public LwSocketException(String message, int errorCode) {
+		public SocketException(String message, int errorCode) {
 			super(message);
 			this.errorCode = errorCode;
 		}

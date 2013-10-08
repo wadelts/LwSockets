@@ -1,7 +1,7 @@
 package lw.sockets.interfaces;
 
-import lw.sockets.LwSocketEvent;
-import lw.sockets.LwSocketException;;
+import lw.sockets.SocketEvent;
+import lw.sockets.SocketException;;
 /**
   * Encapsulates receiving XML messages over a socket (server) connection.
   * The LwXMLMesssageOverSocket object call this interface.
@@ -21,7 +21,7 @@ public interface LwIXMLSocketServerListener {
   *
   * @return true if the response is to be consumed, otherwise false
   */
-boolean messageReceived(LwSocketEvent event);
+boolean messageReceived(SocketEvent event);
 
 /**
   * Will be called by the supporting object when a complete message is available for delivery
@@ -31,7 +31,7 @@ boolean messageReceived(LwSocketEvent event);
   *
   * @return the response to be sent back over the socket
   */
-String messageReceivedAndWantResponse(LwSocketEvent event);
+String messageReceivedAndWantResponse(SocketEvent event);
 
 /**
   * Will be called by the supporting object when an error is encountered
@@ -40,7 +40,7 @@ String messageReceivedAndWantResponse(LwSocketEvent event);
   * @param exception LwSocketException explaining the problem
   *
   */
-void handleError(LwSocketEvent event, LwSocketException exception);
+void handleError(SocketEvent event, SocketException exception);
 
 /**
   * Will be called by the supporting object when a request has been received over the connection to close down.
@@ -51,7 +51,7 @@ void handleError(LwSocketEvent event, LwSocketException exception);
   *
   * @return true if the Socket Server shold close down, false if it should remain open
   */
-boolean canCloseServerSocket(LwSocketEvent event);
+boolean canCloseServerSocket(SocketEvent event);
 
 /**
   * Will be called by the supporting object to find out if a message should be consumed.
